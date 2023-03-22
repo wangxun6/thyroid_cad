@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../static/css/style.css" />
+<script type="text/javascript" src="../static/js/thyroid.js" ></script>
+<script type="text/javascript" src="../static/js/jquery-3.6.3.min.js"></script>
+<link rel="stylesheet" href="../static/css/jquery-confirm.css">
+<script src="../static/js/jquery-confirm.js"></script>
+
+<title>甲状腺结节辅助诊断系统</title>
+</head>
+<body class="bc">
+<div class="main1">
+<div class="main">
+	<div class="title">
+		<p>欢迎来到甲状腺结节辅助诊断系统</p>
+	</div>
+	<div class="select">
+		<form style="float:left;" id="uploadForm" action="/roi/" method="post" enctype="multipart/form-data">
+<!--			{% csrf_token %}-->
+			<input type="file" class="xfile" id="btn_file" accept="image/*" name="pic1" required/>
+			<button id="open" type="button" class="xxfile" onclick="F_Open_dialog()">打开文件</button>
+<!--			<input type="submit" class="xxsub" value="提取ROI"/>-->
+			<button id="btn0" type="button" class="xxfile">提取ROI</button>
+			<button id="btn1" type="button" class="xxfile">预测结果</button>
+			<button id="btn2" type="button" class="xxfile">切换原图</button>
+			<button id="btn4" type="button" class="xxfile">形状特征</button>
+			<button id="btn5" type="button" class="xxfile">纵横比特征</button>
+			<button id="btn6" type="button" class="xxfile">钙化特征</button>
+			<button id="btn3" type="button" class="xxfile">修正结果</button>
+		</form>
+<!--		<form style="float:left;" action="/class/" method="post" enctype="multipart/form-data">-->
+<!--            {% csrf_token %}-->
+<!--			<input type="submit" class="xxsub" onChange="inputChange()" value="预测结果"/>-->
+<!--		</form>-->
+	</div>
+	<hr width="" align="" color="">
+	<div class="result">
+		<div class="picture" id="contain1">
+			<img id="picturebox">
+		</div>
+		<div class="text">
+			<p>诊断结果</p>
+			<div class="label">
+				<p>甲状腺结节分类为：</p>
+				<p id="pre1"></p>
+			</div>
+			<div class="advise">
+				<p>诊断建议为：</p>
+				<p id="pre2"></p>
+			</div>
+		</div>
+	</div>
+	<hr width="" align="" color="">
+	<div class="pad">
+		<p>特征分析</p>
+	</div>
+	<div class="feature">
+		<p id="pre3"></p>
+	</div>
+	<p style="display: none;" id="fname"></p>
+	<p style="display: none;" id="ismask"></p>
+	<p style="display: none;" id="user">{{ username }}</p>
+</div>
+</div>
+
+</div>
+
+
+<script type="text/javascript">
+
+function myAlert(message) {
+    $.confirm({
+      title: '提示',
+      content: message,
+      boxWidth: '300px',
+      useBootstrap: false,
+<!--      theme:'black',-->
+      buttons: {
+        confirm: {
+          text: '确定',
+          btnClass: 'btn-blue',
+        },
+      },
+    });
+  }
+
+var img = document.getElementById("picturebox");
+var width = img.offsetWidth;
+var height = img.offsetHeight;
+var scaleFactor = 0.1;
+var width0 = document.getElementById("contain1").offsetWidth;
+var height0 = document.getElementById("contain1").offsetHeight;
+var tmppath = "";
+
+img.addEventListener("wheel", function(event) {
+	event.preventDefault();
+
+	var delta = Math.sign(event.deltaY);
+	var newWidth = width + (delta * scaleFactor * width);
+	var newHeight = height + (delta * scaleFactor * height);
+	if(newWidth >= 0.8 * width0 && newWidth <= 3 * width0 && img.src != ""){
+		img.style.width = newWidth + "px";
+		img.style.height = newHeight + "px";
+
+		width = newWidth;
+		height = newHeight;
+	}
+});
+
+
+var fileInput = $("#btn_file");
+var prevFile = fileInput.data('prev-file');
+
+<!--$(document).ready(function() {-->
+     $("#btn_file").on('change', function () {
+		var files = $(this)[0].files;
+		if(files.length != 0){
+			prevFile = files;
+			if (typeof (FileReader) != "undefined") {
+				var reader = new FileReader();
+				reader.onload = function (e) {
+					$("#picturebox").attr("src", e.target.result)
+				}
+			reader.readAsDataURL($("#btn_file")[0].files[0]);
+			} else {
+				myAlert("此浏览器不支持FileReader！");
+			}
+			$("#fname").text($(this)[0].files[0].name);
+			$('#pre1').text("");
+			$('#pre2').text("");
+			$('#pre3').text("");
+			$('#ismask').text("");
+			$.ajax({
+				url:'/index/',
+				type:'post',
+				data:{},
+				success:function (res) {
+					tmppath = res;
+					tmppath1 = '.' + tmppath;
+					console.log(tmppath)
+				}
+			})
+		}else{
+			$(this)[0].files = prevFile;
+		}
+
+    });
+<!--});-->
+
+fileInput[0].files = prevFile;
+
+$('#btn0').click(function () {
+	var picname = $('#fname').text();
+	var is_mask = $('#ismask').text();
+	if(picname == ""){
+		myAlert("未检测到图像，请上传图像后再进行！");
+	}else if(is_mask == ""){
+		var formdata = new FormData();
+		var file = $('#btn_file')[0].files[0];
+		formdata.append('file', file);
+		formdata.append('path', tmppath);
+		$.ajax({
+			url:'/roi/',
+			type:'post',
+			data:formdata,
+			processData: false,
+			contentType: false,
+			success:function (res) {
+				res = '.' + res;
+				$('#picturebox').attr("src", res);
+				$('#ismask').text("true");
+			}
+		})
+	}else{
+		con_path = tmppath1 + '/' + 'contour.jpg';
+		$('#picturebox').attr("src", con_path);
+	}
+})
+	$('#btn1').click(function () {
+		var picname = $('#fname').text();
+		var ori_path = tmppath + '/' + 'original.jpg';
+		if(picname == ""){
+			myAlert("未检测到图像，请上传图像后再进行！");
+		}else{
+			$.ajax({
+				url:'/class/',
+				type:'post',
+				data:{'path':tmppath},
+				success:function (res) {
+					res_json = JSON.parse(res);
+					if (res_json.class == "error"){
+						myAlert("未检测到mask，请生成mask后再进行！");
+					}else{
+						$('#pre1').text(res_json.class);
+						$('#pre2').text(res_json.advise);
+					}
+				}
+			})
+		}
+    })
+	$('#btn2').click(function () {
+		var picname = $('#fname').text();
+		var is_mask = $('#ismask').text();
+		if(picname == ""){
+			myAlert("未检测到图像，请上传图像后再进行！");
+		}else if(is_mask == ""){
+			var reader = new FileReader();
+            reader.onload = function (e) {
+                $("#picturebox").attr("src", e.target.result);
+            }
+            reader.readAsDataURL($("#btn_file")[0].files[0]);
+		}else{
+			ori_path = tmppath1 + '/' + 'original.jpg';
+			$('#picturebox').attr("src", ori_path);
+		}
+	})
+	$('#btn3').click(function () {
+		var picname = $('#fname').text();
+		var class_info = $('#pre1').text();
+		var username = $('#user').text();
+		var msg = "预测结果是否正确？";
+		var deferred = $.Deferred();
+		if(class_info == ""){
+			myAlert("未检测到预测结果，请进行预测后再进行！");
+		}else{
+			var jc = $.confirm({
+				title:"甲状腺辅助诊断系统提示",
+				content:"预测结果是否正确？",
+				boxWidth: '300px',
+				useBootstrap: false,
+				closeIcon: true,
+				buttons:{
+	<!--				confirm:{text:'是'},-->
+	<!--				cancel:{text:'否'}-->
+						是: function () {deferred.resolve(true);},
+						否: function () {deferred.resolve(false);}
+   	 			},
+   	 			columnClass: 'custom-class'
+			});
+			jc.setDialogCenter();
+			deferred.promise().done(function (result) {
+				if (result) {
+					flag = true;
+					$.ajax({
+						url:'/save/',
+						type:'post',
+						data:{'class':class_info, 'is_correct':flag, 'name':picname, 'user':username},
+						success:function (msg) {
+							if(msg=="error"){
+								myAlert("上传失败，请确认您已经上传文件以及执行预测！");
+							}else{
+								myAlert("上传成功！");
+							}
+						}
+					})
+				} else {
+					flag = false;
+					$.ajax({
+						url:'/save/',
+						type:'post',
+						data:{'class':class_info, 'is_correct':flag, 'name':picname, 'user':username},
+						success:function (msg) {
+							if(msg=="error"){
+								myAlert("上传失败，请确认您已经上传文件以及执行预测！");
+							}else{
+								myAlert("上传成功！");
+							}
+						}
+					})
+				}
+			})
+
+		}
+	})
+	$('#btn4').click(function () {
+		var picname = $('#fname').text();
+		if(picname == ""){
+			myAlert("未检测到图像，请上传图像后再进行！");
+		}else{
+			$.ajax({
+				url:'/round/',
+				type:'post',
+				data:{'path':tmppath},
+				success:function (res) {
+					res_json = JSON.parse(res)
+					if(res_json.round == "error"){
+						myAlert("未检测到mask，请生成mask后再进行！");
+					}else{
+						$('#pre3').text(res_json.round);
+						path1 = tmppath1 + '/' + "ellipse.jpg";
+						$('#picturebox').attr("src", path1);
+					}
+				}
+			})
+		}
+    })
+    $('#btn5').click(function () {
+    	var picname = $('#fname').text();
+		if(picname == ""){
+			myAlert("未检测到图像，请上传图像后再进行！");
+		}else{
+			$.ajax({
+				url:'/at/',
+				type:'post',
+				data:{'path':tmppath},
+				success:function (res) {
+					res_json = JSON.parse(res)
+					if(res_json.at == "error"){
+						myAlert("未检测到mask，请生成mask后再进行！");
+					}else{
+						$('#pre3').text(res_json.at);
+						path1 = tmppath1 + '/' + "rec.jpg";
+						$('#picturebox').attr("src", path1);
+					}
+				}
+			})
+		}
+    })
+    $('#btn6').click(function () {
+    	var picname = $('#fname').text();
+		if(picname == ""){
+			myAlert("未检测到图像，请上传图像后再进行！")
+		}else{
+			$.ajax({
+				url:'/foci/',
+				type:'post',
+				data:{'path':tmppath},
+				success:function (res) {
+					res_json = JSON.parse(res)
+					if(res_json.foci == "error"){
+						myAlert("未检测到mask，请生成mask后再进行！")
+					}else{
+						$('#pre3').text(res_json.foci);
+						path1 = tmppath1 + '/' + "foci.jpg";
+						$('#picturebox').attr("src", path1);
+					}
+				}
+			})
+		}
+    })
+</script>
+</body>
+</html>

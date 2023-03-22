@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/login.css" />
+    <script type="text/javascript" src="../static/js/jquery-3.6.3.min.js"></script>
+
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>登录页面</title>
+</head>
+<body>
+<form action="/index1/" method="post">
+    {% csrf_token %}
+    <div class="denglu-box">
+            <div class="biaoti">登录</div>
+            <input type="text" placeholder="账号" name="user">
+            <input type="password" placeholder="密码" name="pwd">
+            <button type="submit">登录</button>
+            <span>没有账号？<a href="/register/">去注册</a></span>
+
+            <span>忘记密码？<a href="/reset_pwd/">重设密码</a></span>
+    </div>
+</form>
+    <div class="square">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+    <div class="circle">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+    <div class="loader-animate">
+        <div class="loading">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function(){
+            $('.loader-animate').fadeOut('slow',function(){
+                $('.denglu-box').show();
+            });
+        })
+    </script>
+</body>
+{% block content %} {% endblock %}
+</html>

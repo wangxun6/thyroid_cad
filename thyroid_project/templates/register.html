@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/login.css" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>注册页面</title>
+    <script type="text/javascript" src="../static/js/jquery-3.6.3.min.js"></script>
+ 
+</head>
+<body>
+    <form action="/registergoto/" method="post">
+        {% csrf_token %}
+        <div class="denglu-box">
+            <div class="biaoti">注册</div>
+            <div class="form-group">
+                <input id="account" type="text" name="user" placeholder="邮箱账号(例:1722445154@163.com)">
+                <div id="txt1" class=""></div>
+            </div>
+            <div class="form-group">
+                <input id="password" type="password" name="pwd" placeholder="密码长度8-16">
+                <div id="txt2"></div>
+            </div>
+            <button id="btn0" type="submit" style="display: none;">注册</button>
+            <button id="btn1" type="button">注册</button>
+            <span>已有账号？<a href="/">去登录</a></span>
+
+        </div>
+    </form>
+
+    <div class="square">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+    <div class="circle">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+    </div>
+    <script type="text/javascript">
+    function myAlert(message) {
+       $.confirm({
+          title: '提示',
+          content: message,
+          boxWidth: '300px',
+          useBootstrap: false,
+          buttons: {
+            confirm: {
+              text: '确定',
+              btnClass: 'btn-blue',
+            },
+          },
+       });
+    }
+            $(function(){
+                // 邮箱验证
+                $('#account').blur(function(){
+                    register_user()
+                })
+                function register_user(){
+                    var val = $('#account').val()
+                    var reg = /^(\w+(\_|\-|\.)*)+@(\w+(\-)?)+(\.\w{2,})+$/;
+                    if(val == ''){
+                        $('#account').next().show().html('不能为空！')
+                        $('#account').next().addClass('text-danger')
+                        $('#account').next().removeClass('text-success')
+                    }else if(reg.test(val)){
+                        $('#account').next().show().html('验证成功！')
+                        $('#account').next().addClass('text-success')
+                        $('#account').next().removeClass('text-danger')
+                    }else{
+                        $('#account').next().show().html('请输入正确的邮箱！')
+                        $('#account').next().addClass('text-danger')
+                        $('#account').next().removeClass('text-success')
+                    }
+                }
+                // 密码验证
+                $('#password').blur(function(){
+                    register_pwd()
+                })
+                function register_pwd(){
+                    var val = $('#password').val()
+                    var reg = /^\w{8,16}$/;
+                    if(val == ''){
+                        $('#password').next().show().html('不能为空！')
+                        $('#password').next().addClass('text-danger')
+                        $('#password').next().removeClass('text-success')
+                    }else if(reg.test(val)){
+                        $('#password').next().show().html('验证成功！')
+                        $('#password').next().addClass('text-success')
+                        $('#password').next().removeClass('text-danger')
+                    }else{
+                        $('#password').next().show().html('请输入正确的密码！')
+                        $('#password').next().addClass('text-danger')
+                        $('#password').next().removeClass('text-success')
+                    }
+                }
+            })
+    $('#btn1').click(function () {
+		var val1 = $('#account').val();
+        var reg1 = /^(\w+(\_|\-|\.)*)+@(\w+(\-)?)+(\.\w{2,})+$/;
+		var val2 = $('#password').val();
+        var reg2 = /^\w{8,16}$/;
+        var result = reg1.test(val1) + reg2.test(val2);
+		if(result != 2){
+		    myAlert("请输入正确的账号密码");
+		}
+		else{
+			document.getElementById("btn0").click();
+		}
+    })
+    </script>
+</body>
+{% block content %} {% endblock %}
+</html> 

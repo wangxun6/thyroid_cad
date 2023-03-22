@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>找回密码</title>
+</head>
+<body>
+<form action="/reset_pwd1/" method="post">
+    {% csrf_token %}
+    <div class="denglu-box">
+            <div class="biaoti">找回密码</div>
+            <p>请输入账号</p>
+            <input type="text" placeholder="账号" name="user">
+            <button type="submit">找回</button>
+    </div>
+</form>
+
+</body>
+</html>

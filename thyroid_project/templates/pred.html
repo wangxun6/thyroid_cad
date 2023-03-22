@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../static/css/style.css" />
+<script type="text/javascript" src="../static/js/thyroid.js" ></script>
+<title>甲状腺结节辅助诊断系统</title>
+</head>
+<body class="bc">
+<div class="main1">
+<div class="main">
+	<div class="title">
+		<p>欢迎来到甲状腺结节辅助诊断系统</p>
+	</div>
+	<div class="select">
+		<form style="float:left;" action="/roi/" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+			<input type="file" class="xfile" id="btn_file" accept="image/*" onChange="inputChange()" name="pic1"/>
+			<button type="button" onclick="F_Open_dialog()" class="xxfile">打开文件</button>
+			<input type="submit" class="xxsub" value="提取ROI"/>
+<!--			<button type="button" onclick="F_predict()" class="xxfile">预测结果</button>-->
+		</form>
+		<form style="float:left;" action="/class/" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+			<input type="submit" class="xxsub" onChange="inputChange()" value="预测结果"/>
+		</form>
+	</div>
+	<hr width="" align="" color="">
+	<div class="result">
+		<div class="picture">
+			<img id="picturebox" src="../static/tmp/contour.jpg" >
+		</div>
+		<div class="text">
+			<p>诊断结果</p>
+			<div class="label">
+				<p>甲状腺结节分类为：</p>
+				<p id="pre1">{{ predict_class }}</p>
+			</div>
+			<div class="advise">
+				<p>诊断建议为：</p>
+				<p id="pre2">{{ predict_advise }}</p>
+			</div>
+		</div>
+	</div>
+	<hr width="" align="" color="">
+	<div class="pad">
+		<p>特征分析</p>
+	</div>
+	<div class="feature">
+		<p>{{ feature_text }}</p>
+	</div>
+</div>
+</div>
+</div>
+</body>
+</html>
